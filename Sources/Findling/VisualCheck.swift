@@ -402,7 +402,7 @@ extension AppDelegate {
         clip.scroll(to: NSPoint(x: 0, y: document.isFlipped ? max(0, document.frame.height - clip.bounds.height) : 0))
         scroll.reflectScrolledClipView(clip)
     }
-    private static let notes = """
+    static let notes = """
         ---
         tags: [findling, preview]
         aliases: [Notes]
@@ -435,7 +435,7 @@ extension AppDelegate {
         1. Measure
         2. Ship
         """
-    private func drawHarbor(to url: URL) throws {
+    func drawHarbor(to url: URL) throws {
         let width = 1600, height = 1000
         guard let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpace(name: CGColorSpace.sRGB)!,
                                       bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue),
@@ -464,7 +464,7 @@ extension AppDelegate {
         CGImageDestinationAddImage(destination, cgImage, nil)
         guard CGImageDestinationFinalize(destination) else { throw checkError("Could not write the image fixture") }
     }
-    private func drawReport(to url: URL) throws {
+    func drawReport(to url: URL) throws {
         var box = CGRect(x: 0, y: 0, width: 595, height: 842)
         guard let context = CGContext(url as CFURL, mediaBox: &box, [kCGPDFContextCreator: "Findling"] as CFDictionary) else { throw checkError("Could not write the PDF fixture") }
         NSGraphicsContext.saveGraphicsState()
@@ -489,7 +489,7 @@ extension AppDelegate {
         context.closePDF()
     }
 
-    private func settle() async {
+    func settle() async {
         try? await Task.sleep(nanoseconds: 100_000_000)
         for _ in 0..<100 where model.searching { try? await Task.sleep(nanoseconds: 50_000_000) }
         try? await Task.sleep(nanoseconds: 100_000_000)
@@ -507,10 +507,10 @@ extension AppDelegate {
         try data.write(to: url)
         print("Captured \(url.lastPathComponent): \(Int(view.bounds.width)) × \(Int(view.bounds.height)) pt")
     }
-    private func findField(_ view: NSView?) -> NSTextField? {
+    func findField(_ view: NSView?) -> NSTextField? {
         guard let view else { return nil }
         if let field = view as? NSTextField { return field }
         return view.subviews.lazy.compactMap { self.findField($0) }.first
     }
-    private func checkError(_ message: String) -> NSError { NSError(domain: "Findling.VisualCheck", code: 1, userInfo: [NSLocalizedDescriptionKey: message]) }
+    func checkError(_ message: String) -> NSError { NSError(domain: "Findling.VisualCheck", code: 1, userInfo: [NSLocalizedDescriptionKey: message]) }
 }

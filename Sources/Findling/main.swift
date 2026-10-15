@@ -73,7 +73,7 @@ final class LauncherPanel: NSPanel {
     var openItem: NSMenuItem!
     var subscription: AnyCancellable?
     var shortcutSubscription: AnyCancellable?
-    let model = Model(previewing: CommandLine.arguments.contains("--capture-previews"))
+    let model = Model(previewing: ["--capture-previews", "--capture-demo"].contains(where: CommandLine.arguments.contains))
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -115,6 +115,12 @@ final class LauncherPanel: NSPanel {
             panel.animates = false
             show()
             Task { await capturePreviews() }
+            return
+        }
+        if CommandLine.arguments.contains("--capture-demo") {
+            panel.animates = false
+            show()
+            Task { await captureDemo() }
             return
         }
         model.shortcut.registration = CarbonHotkey { [weak self] in self?.toggle() }

@@ -50,7 +50,7 @@ import os
         return min(scaled(396), scaled(CGFloat(visibleHits.count * 44 + (query.isEmpty ? 28 : 0))) + 16)
     }
     var panelHeight: CGFloat { scaled(56) + (showsFilters ? filterHeight : 0) + bodyHeight + scaled(32) + 2 }
-    // Fixture records for --capture-previews; the app itself searches the catalog on disk.
+    // Fixture records for --capture-previews and --capture-demo; the app itself searches the catalog on disk.
     private var entries: [Entry] = []
     private var prepared = SearchIndex([])
     private var catalog: Catalog?
@@ -468,6 +468,7 @@ import os
     func select(_ hit: Hit) { selectionWasMoved = true; selection = hit.id }
     /// The other fixtures exist only in the index; preview details need files on disk.
     func addFixtures(_ added: [Entry]) { entries += added; prepared = SearchIndex(entries) }
+    func replaceFixtures(_ all: [Entry]) { entries = all; prepared = SearchIndex(all); search(resetSelection: true) }
     func savePreferences() {
         if !previewing, let data = try? JSONEncoder().encode(preferences) { UserDefaults.standard.set(data, forKey: "preferences") }
         search()

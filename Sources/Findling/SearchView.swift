@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import UniformTypeIdentifiers
 import FindlingCore
 
 // Measurements and colors from the OpenDesign Findling macOS launcher board.
@@ -9,7 +10,14 @@ enum LauncherStyle {
     }()
     static func icon(_ path: String) -> NSImage {
         if let image = icons.object(forKey: path as NSString) { return image }
-        let image = NSWorkspace.shared.icon(forFile: path)
+        // Fixtures, and items deleted since the last index update, have no file to take the icon from.
+        let image: NSImage
+        if FileManager.default.fileExists(atPath: path) {
+            image = NSWorkspace.shared.icon(forFile: path)
+        } else {
+            let pathExtension = URL(fileURLWithPath: path).pathExtension
+            image = NSWorkspace.shared.icon(for: pathExtension.isEmpty ? .folder : UTType(filenameExtension: pathExtension) ?? .data)
+        }
         icons.setObject(image, forKey: path as NSString)
         return image
     }
