@@ -90,7 +90,11 @@ final class LauncherPanel: NSPanel {
         panel.contentView = host
         panel.delegate = self
         status = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        status.button?.image = NSImage(systemSymbolName: "doc.text.magnifyingglass", accessibilityDescription: "Findling")
+        // The template image is only in the app bundle; a bare `swift build` binary falls back to the symbol.
+        let statusImage = NSImage(named: "MenuBarIconTemplate") ?? NSImage(systemSymbolName: "doc.text.magnifyingglass", accessibilityDescription: nil)
+        statusImage?.isTemplate = true
+        statusImage?.accessibilityDescription = "Findling"
+        status.button?.image = statusImage
         status.button?.toolTip = "Findling"
         let menu = NSMenu()
         openItem = add(menu, "Open Findling", #selector(show))

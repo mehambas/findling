@@ -1,3 +1,5 @@
+<img src="docs/images/icon.png" width="128" alt="">
+
 # Findling
 
 **Find any file, folder, project or app on your Mac as you type.**

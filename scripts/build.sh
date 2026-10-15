@@ -10,7 +10,7 @@ app_path="$PWD/dist/Findling.app"
 mkdir -p "$app_path/Contents/MacOS" "$app_path/Contents/Resources"
 cp "$binary_dir/Findling" "$app_path/Contents/MacOS/Findling"
 cp Resources/Info.plist "$app_path/Contents/Info.plist"
-if [ -f Resources/AppIcon.icns ]; then cp Resources/AppIcon.icns "$app_path/Contents/Resources/AppIcon.icns"; fi
+cp Resources/AppIcon.icns Resources/MenuBarIconTemplate.png Resources/MenuBarIconTemplate@2x.png "$app_path/Contents/Resources/"
 # An ad hoc signature changes with every build, and macOS then asks for folder access again.
 # The self-signed certificate from scripts/make-certificate.sh keeps the identity stable;
 # FINDLING_SIGN_IDENTITY picks another one, - forces ad hoc signing.
