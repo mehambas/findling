@@ -83,6 +83,17 @@ bash scripts/build.sh && scripts/make-demo.sh
 
 `--capture-demo` writes sample files to a temporary folder, plays a short session in the launcher (shown as if the folder were the home folder) and saves each step as a frame; `make-demo.sh` turns the frames into `docs/images/demo-dark.gif` and `demo-light.gif` with ffmpeg.
 
+### Icon
+
+`Resources/Icon` holds the icon sources: the 1024 px artwork, simplified artwork for 16 and 32 px, the layers and the menu bar icon. `Resources/AppIcon.icon` is the Icon Composer version, built from the stone and highlight layers with a light and a dark fill; macOS 26 and later derive the tinted and clear styles from it. After changing either, run `scripts/make-icon.sh`: it writes `AppIcon.icns` for macOS 14 and 15 and compiles the `.icon` into `Assets.car` (this needs Xcode 26 or later). Both results are committed, so building the app needs neither Xcode nor the script. To check every style without changing System Settings:
+
+```sh
+"/Applications/Xcode.app/Contents/Applications/Icon Composer.app/Contents/Executables/ictool" Resources/AppIcon.icon \
+    --export-image --output-file dark.png --platform macOS --rendition Dark --width 512 --height 512 --scale 1
+```
+
+The renditions are `Default`, `Dark`, `TintedLight`, `TintedDark`, `ClearLight` and `ClearDark`.
+
 ### Releases
 
 ```sh
