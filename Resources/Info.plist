@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleExecutable</key><string>Findling</string>
+<key>CFBundleIdentifier</key><string>com.hamzabasaran.findling</string>
+<key>CFBundleName</key><string>Findling</string>
+<key>CFBundleDisplayName</key><string>Findling</string>
+<key>CFBundleDevelopmentRegion</key><string>en</string>
+<key>CFBundleLocalizations</key><array><string>en</string></array>
+<key>CFBundleVersion</key><string>1</string>
+<key>CFBundleShortVersionString</key><string>0.1.0</string>
+<key>NSHumanReadableCopyright</key><string>© 2026 Hamza Basaran. MIT License.</string>
+<key>LSApplicationCategoryType</key><string>public.app-category.productivity</string>
+<key>LSMinimumSystemVersion</key><string>14.0</string>
+<key>LSUIElement</key><true/>
+<key>NSHighResolutionCapable</key><true/>
+<key>NSDocumentsFolderUsageDescription</key><string>Findling includes your documents in local search.</string>
+<key>NSDesktopFolderUsageDescription</key><string>Findling includes your desktop files in local search.</string>
+<key>NSDownloadsFolderUsageDescription</key><string>Findling includes your downloads in local search.</string>
+<key>NSRemovableVolumesUsageDescription</key><string>Findling includes search locations you add on external disks.</string>
+<key>NSNetworkVolumesUsageDescription</key><string>Findling includes search locations you add on network volumes.</string>
+</dict></plist>

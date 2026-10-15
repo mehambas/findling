@@ -1,0 +1,8 @@
+.DS_Store
+.build/
+dist/
+/design/
+/docs/handoff-*.md
+/docs/opendesign-*.md
+/docs/performance-*.md
+/docs/test-plan-*.md
