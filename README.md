@@ -24,7 +24,7 @@ Findling is a fast, private launcher for the files on your Mac. Press **⇧⌘Sp
 
 1. Download `Findling-<version>.dmg` from the [latest release](https://github.com/mehambas/findling/releases/latest).
 2. Open it and drag **Findling** to **Applications**.
-3. Open Findling. Findling is not notarized by Apple (that needs a paid developer account), so macOS blocks the first launch:
+3. Eject the disk image and open Findling from **Applications**, not from the disk image. Findling is not notarized by Apple (that needs a paid developer account), so macOS blocks the first launch:
    - macOS says it could not verify Findling. Click **Done**.
    - Open **System Settings › Privacy & Security**, scroll down to *“Findling” was blocked*, click **Open Anyway** and confirm.
 
