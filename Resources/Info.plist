@@ -10,7 +10,7 @@
 <key>CFBundleLocalizations</key><array><string>en</string></array>
 <key>CFBundleVersion</key><string>1</string>
 <key>CFBundleShortVersionString</key><string>0.1.0</string>
-<key>NSHumanReadableCopyright</key><string>© 2026 Hamza Basaran. MIT License.</string>
+<key>NSHumanReadableCopyright</key><string>© 2026 mehambas91. MIT License.</string>
 <key>LSApplicationCategoryType</key><string>public.app-category.productivity</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>LSUIElement</key><true/>
