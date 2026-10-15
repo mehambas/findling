@@ -4,6 +4,7 @@
 <key>CFBundleExecutable</key><string>Findling</string>
 <key>CFBundleIdentifier</key><string>com.hamzabasaran.findling</string>
 <key>CFBundleName</key><string>Findling</string>
+<key>CFBundleIconFile</key><string>AppIcon</string>
 <key>CFBundleDisplayName</key><string>Findling</string>
 <key>CFBundleDevelopmentRegion</key><string>en</string>
 <key>CFBundleLocalizations</key><array><string>en</string></array>
