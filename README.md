@@ -4,6 +4,8 @@
 
 **Find any file, folder, project or app on your Mac as you type.**
 
+[Website](https://hamzabasaran.com/findling) · [Download Findling.dmg](https://github.com/mehambas/findling/releases/latest/download/Findling.dmg) · [Changelog](CHANGELOG.md)
+
 Findling is a fast, private launcher for the files on your Mac. Press **⇧⌘Space**, type a few letters and open what you need. It keeps its own index of your home folder, apps, iCloud Drive and cloud folders, so results appear instantly, and nothing about your files ever leaves your Mac.
 
 <picture>
