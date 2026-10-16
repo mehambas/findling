@@ -16,9 +16,9 @@ A shortcut that another app or macOS (System Settings › Keyboard › Keyboard 
 
 ## Settings
 
-Settings use a native 520 pt window with four toolbar tabs, ordered by how often they are needed: **General** (open at login, appearance, keyboard), **Locations** (search locations, folder filters), **Exclusions** (excluded folders, automatically skipped, hidden results) and **Index** (status, access warnings, Refresh Now). Each tab is a grouped form; descriptions sit leading-aligned under their group, with the group's action on the trailing side. Settings reopen on the last tab, and the window height follows the tab and the text size.
+Settings use a native 520 pt window with four toolbar tabs, ordered by how often they are needed: **General** (open at login, appearance, keyboard, updates), **Locations** (search locations, folder filters), **Exclusions** (excluded folders, automatically skipped, hidden results) and **Index** (status, access warnings, Refresh Now). Each tab is a grouped form; descriptions sit leading-aligned under their group, with the group's action on the trailing side. Settings reopen on the last tab, and the window height follows the tab and the text size.
 
-**General** offers Small, Medium and Large text plus Blue, Purple, Teal and Rose theme colors. Typography and row heights adapt together. Colors follow the light or dark appearance and apply to selected results, folder filters, controls, the search caret and the selected settings tab, which Findling draws itself because AppKit would use the system accent color. Preferences apply immediately and persist across restarts without rebuilding the index. **Open at login** registers Findling with `SMAppService`; it can also be switched off in System Settings › General › Login Items.
+**General** offers Small, Medium and Large text plus Blue, Purple, Teal and Rose theme colors. Typography and row heights adapt together. Colors follow the light or dark appearance and apply to selected results, folder filters, controls, the search caret and the selected settings tab, which Findling draws itself because AppKit would use the system accent color. Preferences apply immediately and persist across restarts without rebuilding the index. **Open at login** registers Findling with `SMAppService`; it can also be switched off in System Settings › General › Login Items. **Updates** turns the daily update check on or off, shows the version and the last check, and offers a newer release (see [Updates](#updates)).
 
 Open Settings with the gear button in the search bar, **⌘,** or **Settings…** in the menu bar menu. **Search scope** in the launcher opens the Locations tab; the warning count in its footer opens Index.
 
@@ -48,7 +48,21 @@ Removing a search location does not exclude it if another location still contain
 - Live indexing status shows the import percentage and, during walks, the number of items checked and the current folder. Updates are throttled to avoid slowing down indexing.
 - Each match tier (exact name, prefix, contained name, name or project, path, letters in order) selects its candidates through an index: a trigram index of names and projects, the name and stem-length indexes, and folder subtrees for path matches. Large tiers are read in ranking order, and lower tiers are skipped once they can no longer reach the best 80. Pinned, hidden and previously opened items are ranked separately because they can outrank any tier. Better tiers are shown first; superseded searches are cancelled inside SQLite. An explicit row selection is preserved as later results arrive. File icons are cached and queries have no fixed debounce delay.
 
-No network requests, telemetry, content search, OCR or tracking of activity in other apps. Files are never moved or modified. Opening an iCloud result may let macOS download it. File system changes appear a few seconds after they happen.
+No telemetry, content search, OCR or tracking of activity in other apps; the update check is the only network request. Files are never moved or modified. Opening an iCloud result may let macOS download it. File system changes appear a few seconds after they happen.
+
+## Updates
+
+Findling asks GitHub for its latest release 10 seconds after launch and then whenever an hourly tick finds that 24 hours have passed since the last check. The time of the last check is stored, so restarts don't check again, and **Check for updates automatically** in Settings › General turns the check off. The request is `GET https://api.github.com/repos/mehambas/findling/releases/latest` on an ephemeral URL session without cookies, cache or credentials, with a 15-second timeout. Besides the address it sends only `User-Agent: Findling/<version>`, `Accept-Language: en` and the standard Accept headers: no identifiers, system details or usage data. Any failure (no published release, offline, timeout, rate limit) counts as no news. Automatic checks stay silent about it; **Check for Updates…** in the menu bar menu and **Check Now** in Settings › General always say what they found.
+
+The release's tag (`v0.2.0`) is compared with `CFBundleShortVersionString` number by number, so 0.10.0 is newer than 0.9.0. A newer release puts **Update to 0.2.0…** at the top of the menu bar menu and a row with **Release Notes** and **Download and Install** in Settings › General; the offer is stored until a later check replaces it. **Download and Install** downloads the asset `Findling.dmg` to the temporary folder and compares its SHA-256 with the asset `Findling.dmg.sha256`. If the checksum is missing or does not match, the download is deleted and the release page opens in the browser instead. A verified disk image opens in Finder and Findling quits: it is not notarized, so it cannot replace itself, and Finder won't replace a running app. The user drags the new version to Applications. Progress and errors show in the menu item and the Settings row.
+
+To try the whole flow, serve a release from a local server and start a build with the testing variables:
+
+```sh
+FINDLING_FAKE_VERSION=0.0.1 FINDLING_UPDATE_BASE=http://127.0.0.1:8000 dist/Findling.app/Contents/MacOS/Findling
+```
+
+`FINDLING_FAKE_VERSION` pretends to be another version. `FINDLING_UPDATE_BASE` replaces `https://api.github.com/repos/mehambas/findling`, so the server answers `/releases/latest` with GitHub's JSON (`tag_name`, `html_url`, and `assets` whose `browser_download_url`s point back to the server). With either variable set, Findling checks 10 seconds after launch whatever the last check was, and stores neither the check time nor the offer. Quit the installed Findling first: both would use the same index and shortcut.
 
 ## Performance
 
@@ -66,14 +80,14 @@ open dist/Findling.app
 
 ### Tests and visual check
 
-Core tests cover ranking, Turkish normalization, learned choices, pin/hide, filtering, catalog persistence, project detection, scan scope and exclusions, nested search locations, per-location item counts, preview details (dates, the last open as Launch Services records it versus the stand-ins Spotlight and Nextcloud leave, sizes, pixels of rotated photos, PDF pages), Markdown blocks, plus 190k-item (in memory) and 200k-item (catalog) release performance checks. Catalog tests compare the on-disk search with the in-memory ranking for 1,200 randomized queries and filter combinations and cover incremental updates against a fresh scan, unreadable folders, pruning, watcher event planning, cancellation and FSEvents replay since a stored event id.
+Core tests cover ranking, Turkish normalization, learned choices, pin/hide, filtering, catalog persistence, project detection, scan scope and exclusions, nested search locations, per-location item counts, preview details (dates, the last open as Launch Services records it versus the stand-ins Spotlight and Nextcloud leave, sizes, pixels of rotated photos, PDF pages), Markdown blocks, update versions, GitHub release answers and checksum files, plus 190k-item (in memory) and 200k-item (catalog) release performance checks. Catalog tests compare the on-disk search with the in-memory ranking for 1,200 randomized queries and filter combinations and cover incremental updates against a fresh scan, unreadable folders, pruning, watcher event planning, cancellation and FSEvents replay since a stored event id.
 
 ```sh
 # Deterministic fixture data: no personal index or preferences are touched.
 dist/Findling.app/Contents/MacOS/Findling --capture-previews /tmp/findling-previews
 ```
 
-The visual check exports 63 captures: all three text sizes × four themes × two appearances, previews of a generated PNG, PDF and Markdown note, every settings tab in both appearances, the shortcut recorder states, settings while indexing and with access warnings. Along the way it checks keyboard navigation, filters, exclusions, the shortcut recorder against a stand-in for `RegisterEventHotKey`, nested-location detection and the Add Folder Filter sheet.
+The visual check exports 65 captures: all three text sizes × four themes × two appearances, previews of a generated PNG, PDF and Markdown note, every settings tab in both appearances, an update offer and its download, the shortcut recorder states, settings while indexing and with access warnings. Along the way it checks keyboard navigation, filters, exclusions, the shortcut recorder against a stand-in for `RegisterEventHotKey`, nested-location detection and the Add Folder Filter sheet.
 
 ### Demo animations
 
@@ -100,7 +114,7 @@ The renditions are `Default`, `Dark`, `TintedLight`, `TintedDark`, `ClearLight` 
 scripts/release.sh 0.2.0
 ```
 
-The release script sets the version in `Resources/Info.plist`, increments the build number, builds and signs the app with the self-signed certificate and packs it into `dist/Findling-<version>.dmg`. It prints the disk image's SHA-256 for the release notes.
+The release script sets the version in `Resources/Info.plist`, increments the build number, builds and signs the app with the self-signed certificate, packs it into `dist/Findling.dmg` and writes its SHA-256 to `dist/Findling.dmg.sha256`. Attach both files to the GitHub release (tag `v0.2.0`) under these names: the README links `releases/latest/download/Findling.dmg`, and the update check installs only a disk image whose checksum file it finds next to it.
 
 ### Measuring
 

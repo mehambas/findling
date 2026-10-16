@@ -71,8 +71,11 @@ final class LauncherPanel: NSPanel {
     var settingsWindow: NSWindow?
     var status: NSStatusItem!
     var openItem: NSMenuItem!
+    var updateItem: NSMenuItem!
+    var updateSeparator = NSMenuItem.separator()
     var subscription: AnyCancellable?
     var shortcutSubscription: AnyCancellable?
+    var updateSubscription: AnyCancellable?
     let model = Model(previewing: ["--capture-previews", "--capture-demo"].contains(where: CommandLine.arguments.contains))
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -97,10 +100,13 @@ final class LauncherPanel: NSPanel {
         status.button?.image = statusImage
         status.button?.toolTip = "Findling"
         let menu = NSMenu()
+        updateItem = add(menu, "", #selector(showUpdate))
+        menu.addItem(updateSeparator)
         openItem = add(menu, "Open Findling", #selector(show))
         add(menu, "Refresh Index", #selector(refresh))
         menu.addItem(.separator())
         add(menu, "Settings…", #selector(showSettings(_:)), key: ",")
+        add(menu, "Check for Updates…", #selector(checkForUpdates))
         menu.addItem(.separator())
         add(menu, "Quit Findling", #selector(quit), key: "q")
         status.menu = menu
@@ -114,6 +120,12 @@ final class LauncherPanel: NSPanel {
         shortcutSubscription = model.shortcut.$current.combineLatest(model.shortcut.$works).sink { [weak self] shortcut, works in
             self?.openItem.keyEquivalent = works ? shortcut.keyEquivalent : ""
             self?.openItem.keyEquivalentModifierMask = works ? shortcut.modifierFlags : []
+        }
+        updateSubscription = model.updater.$release.combineLatest(model.updater.$status).sink { [weak self] release, status in
+            let title = Updater.menuTitle(release, status)
+            self?.updateItem.title = title ?? ""
+            self?.updateItem.isHidden = title == nil
+            self?.updateSeparator.isHidden = title == nil
         }
         if CommandLine.arguments.contains("--capture-previews") {
             panel.animates = false
@@ -130,6 +142,7 @@ final class LauncherPanel: NSPanel {
         model.shortcut.registration = CarbonHotkey { [weak self] in self?.toggle() }
         activateShortcut()
         show()
+        model.updater.start()
     }
 
     func activateShortcut() {
@@ -246,5 +259,10 @@ final class LauncherPanel: NSPanel {
     @objc func pin() { if panel.isKeyWindow, let hit = model.selected { model.pin(hit) } }
     @objc func hideResult() { if panel.isKeyWindow, let hit = model.selected { model.hide(hit) } }
     @objc func refresh() { model.refresh() }
+    @objc func showUpdate() { openSettings(.general) }
+    @objc func checkForUpdates() {
+        model.updater.check(manual: true)
+        openSettings(.general)
+    }
     @objc func quit() { NSApp.terminate(nil) }
 }

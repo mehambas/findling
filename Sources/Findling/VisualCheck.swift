@@ -124,6 +124,7 @@ extension AppDelegate {
                     try capture(settingsWindow, to: output.appendingPathComponent("\(name)-settings\(tab == .general ? "" : "-" + tab.rawValue).png"))
                 }
             }
+            try await checkUpdateOffer(output: output)
             try await checkShortcutRecorder(hotkey, macOS: spotlight, output: output)
             if let settingsWindow, let controller = settingsWindow.contentViewController as? SettingsController {
                 let preferences = model.preferences
@@ -259,13 +260,33 @@ extension AppDelegate {
             try capture(panel, to: output.appendingPathComponent("dark-no-folder-filters.png"))
             model.folderFilters = filters
             try await checkPreviewDetails(output: output)
-            print("PASS: 3 text sizes × 4 themes × 2 appearances, selection contrast, combined filters, input font, appearance changes preserve search, indexing progress, keyboard navigation, settings tabs, shortcut recorder, refusals and registration, folder filter sheet, naming and removal, reopened search selection, Projects only with projects, filter locations only when needed, preview dates, size, pixels, pages, thumbnails and Markdown; 63 visual captures.")
+            print("PASS: 3 text sizes × 4 themes × 2 appearances, selection contrast, combined filters, input font, appearance changes preserve search, indexing progress, keyboard navigation, settings tabs, update offer, shortcut recorder, refusals and registration, folder filter sheet, naming and removal, reopened search selection, Projects only with projects, filter locations only when needed, preview dates, size, pixels, pages, thumbnails and Markdown; 65 visual captures.")
             NSApp.terminate(nil)
         } catch {
             fputs("Visual check failed: \(error)\n", stderr)
             exit(1)
         }
     }
+    /// A newer release shows at the top of the menu bar menu and in Settings › General, with the download's progress in both.
+    private func checkUpdateOffer(output: URL) async throws {
+        let updater = model.updater
+        updater.release = Release(tag: "v9.9.0", page: URL(string: "https://github.com/mehambas/findling/releases/tag/v9.9.0")!, assets: [:])
+        openSettings(.general)
+        await settle()
+        guard let settingsWindow, updateItem.title == "Update to 9.9.0…", !updateItem.isHidden, !updateSeparator.isHidden else {
+            throw checkError("The update offer is missing from the menu")
+        }
+        try capture(settingsWindow, to: output.appendingPathComponent("dark-settings-update.png"))
+        updater.status = .downloading(0.42)
+        await settle()
+        guard updateItem.title == "Downloading 9.9.0… 42%" else { throw checkError("The download's progress is missing from the menu") }
+        try capture(settingsWindow, to: output.appendingPathComponent("dark-settings-update-downloading.png"))
+        updater.status = .idle
+        updater.release = nil
+        await settle()
+        guard updateItem.isHidden, updateSeparator.isHidden else { throw checkError("The update offer stayed in the menu") }
+    }
+
     /// Recording pauses the shortcut; a refused one keeps the old shortcut registered and says why.
     private func checkShortcutRecorder(_ hotkey: PreviewHotkey, macOS: Shortcut, output: URL) async throws {
         let shortcut = model.shortcut

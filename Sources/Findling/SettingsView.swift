@@ -18,7 +18,7 @@ enum SettingsTab: String, CaseIterable {
     /// Content height at Medium; the form scrolls when it holds more.
     var height: CGFloat {
         switch self {
-        case .general: return 486
+        case .general: return 660
         case .locations: return 560
         case .exclusions: return 640
         case .index: return 460
@@ -142,7 +142,7 @@ struct SettingsPane: View {
     var body: some View {
         Group {
             switch tab {
-            case .general: GeneralSettings(model: model)
+            case .general: GeneralSettings(model: model, updater: model.updater)
             case .locations: LocationSettings(model: model)
             case .exclusions: ExclusionSettings(model: model, state: state)
             case .index: IndexSettings(model: model)
@@ -160,6 +160,7 @@ private let english = Locale(identifier: "en_US")
 
 private struct GeneralSettings: View {
     @ObservedObject var model: Model
+    @ObservedObject var updater: Updater
     @StateObject private var loginItem = LoginItem()
     @Environment(\.colorScheme) private var scheme
 
@@ -206,12 +207,22 @@ private struct GeneralSettings: View {
                 }
             } header: {
                 SectionTitle(model: model, text: "Keyboard")
+            }
+            Section {
+                Toggle(isOn: $updater.automatic) {
+                    TitleAndDetail(model: model, title: "Check for updates automatically", detail: "Once a day Findling asks GitHub for the latest version number.")
+                }
+                .toggleStyle(.switch)
+                UpdateRow(model: model, updater: updater)
+            } header: {
+                SectionTitle(model: model, text: "Updates")
             } footer: {
                 Label {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Everything stays on this Mac.").foregroundStyle(.primary)
-                        Text("No network, no telemetry. Findling never moves or changes your files.")
+                        Text("No telemetry. The update check sends nothing about you or your files, and Findling never moves or changes them.")
                             .font(.system(size: model.scaled(11))).foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 } icon: {
                     Image(systemName: "lock").font(.system(size: model.scaled(12))).foregroundStyle(.secondary)
@@ -238,6 +249,65 @@ private struct GeneralSettings: View {
         .help(theme.title)
         .accessibilityLabel(theme.title)
         .accessibilityAddTraits(selected ? [.isSelected] : [])
+    }
+}
+
+private struct UpdateRow: View {
+    @ObservedObject var model: Model
+    @ObservedObject var updater: Updater
+
+    var body: some View {
+        if let release = updater.release, let version = release.version {
+            LabeledContent {
+                Button("Download and Install") { updater.install() }
+                    .disabled(busy)
+                    .help("Downloads the disk image and opens it, then Findling quits so you can drag the new version to Applications.")
+            } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Findling \(version.description) is available")
+                    switch updater.status {
+                    case .downloading(let fraction):
+                        ProgressView(value: fraction).accessibilityLabel("Downloading Findling \(version.description)").frame(height: model.scaled(14))
+                    case .opening:
+                        detail("Drag Findling from the disk image to Applications and replace this version.")
+                    case .failed(let reason):
+                        WarningLine(model: model, text: reason)
+                    default:
+                        HStack(spacing: 4) {
+                            detail("You have \(updater.current.description).")
+                            Link("Release Notes", destination: release.page).font(.system(size: model.scaled(11)))
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        } else {
+            LabeledContent {
+                Button("Check Now") { updater.check(manual: true) }.disabled(updater.status == .checking)
+            } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Findling \(updater.current.description)")
+                    switch updater.status {
+                    case .checking: detail("Checking for updates…")
+                    case .upToDate: detail("This is the latest version.")
+                    case .checkFailed(let reason): WarningLine(model: model, text: "Couldn’t check for updates. " + reason)
+                    default: detail(updater.lastCheck.map { "Last checked: " + LauncherStyle.date($0) } ?? "Not checked yet.")
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    private var busy: Bool {
+        switch updater.status {
+        case .downloading, .opening: return true
+        default: return false
+        }
+    }
+
+    private func detail(_ text: String) -> some View {
+        Text(text).font(.system(size: model.scaled(11))).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -626,22 +696,15 @@ private struct ShortcutRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Open Findling")
                 if let refusal = shortcut.refusal {
-                    warning(refusal)
+                    WarningLine(model: model, text: refusal)
                 } else {
                     Text(shortcut.recording ? "Press the new shortcut. Esc cancels." : "Works from any app.")
                         .font(.system(size: model.scaled(11))).foregroundStyle(.secondary)
                 }
-                if let problem = shortcut.problem { warning(problem.message(current: shortcut.current)) }
+                if let problem = shortcut.problem { WarningLine(model: model, text: problem.message(current: shortcut.current)) }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-    }
-
-    private func warning(_ text: String) -> some View {
-        Label(text, systemImage: "exclamationmark.triangle.fill")
-            .font(.system(size: model.scaled(11))).foregroundStyle(.orange)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.top, 2)
     }
 
     private var recorder: some View {
@@ -665,6 +728,18 @@ private struct ShortcutRow: View {
         .accessibilityValue(shortcut.recording ? "Recording" : shortcut.current.spoken)
         .accessibilityHint(shortcut.recording ? "Press the new shortcut, or Escape to cancel." : "Records a new shortcut.")
         .onDisappear { shortcut.cancelRecording() }
+    }
+}
+
+private struct WarningLine: View {
+    @ObservedObject var model: Model
+    let text: String
+
+    var body: some View {
+        Label(text, systemImage: "exclamationmark.triangle.fill")
+            .font(.system(size: model.scaled(11))).foregroundStyle(.orange)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.top, 2)
     }
 }
 

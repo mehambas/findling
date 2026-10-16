@@ -4,7 +4,7 @@
 
 **Find any file, folder, project or app on your Mac as you type.**
 
-Findling is a fast, private launcher for the files on your Mac. Press **⇧⌘Space**, type a few letters and open what you need. It keeps its own index of your home folder, apps, iCloud Drive and cloud folders, so results appear instantly, and nothing ever leaves your Mac.
+Findling is a fast, private launcher for the files on your Mac. Press **⇧⌘Space**, type a few letters and open what you need. It keeps its own index of your home folder, apps, iCloud Drive and cloud folders, so results appear instantly, and nothing about your files ever leaves your Mac.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/demo-dark.gif">
@@ -19,12 +19,12 @@ Findling is a fast, private launcher for the files on your Mac. Press **⇧⌘Sp
 - **Filters.** Tab through Apps, Projects, Folders and Files. Add your favourite folders to the **Search in** row.
 - **Projects** are recognized by `.git`, `Package.swift`, `package.json`, `Cargo.toml`, `pyproject.toml` and `pubspec.yaml`.
 - **Learns** which result you open for a query. Pin results you need often and hide the ones you never want.
-- **Private.** No network access, no telemetry. Findling never moves or changes your files.
+- **Private.** No telemetry, and nothing about you or your files leaves your Mac. Findling never moves or changes your files.
 - Native SwiftUI and AppKit, light and dark, four theme colors, three text sizes. Apple silicon and Intel, macOS 14 or later.
 
 ## Install
 
-1. Download `Findling-<version>.dmg` from the [latest release](https://github.com/mehambas/findling/releases/latest).
+1. Download [Findling.dmg](https://github.com/mehambas/findling/releases/latest/download/Findling.dmg) from the [latest release](https://github.com/mehambas/findling/releases/latest).
 2. Open it and drag **Findling** to **Applications**.
 3. Eject the disk image and open Findling from **Applications**, not from the disk image. Findling is not notarized by Apple (that needs a paid developer account), so macOS blocks the first launch:
    - macOS says it could not verify Findling. Click **Done**.
@@ -36,6 +36,10 @@ Findling is a fast, private launcher for the files on your Mac. Press **⇧⌘Sp
 On the first launch Findling indexes your Mac in the background: a few minutes for a million items. You can search right away; results fill in as the index grows. macOS asks whether Findling may read your Desktop, Documents and Downloads folders. If you decline, those folders are skipped, and **Settings › Index** lists every folder Findling could not read.
 
 To start Findling when you log in, turn on **Settings › General › Open at login**.
+
+### Updates
+
+Findling checks for a new version once a day. When one is out, its menu bar menu starts with **Update to** and the version number, and **Settings › General** shows the release notes and **Download and Install**. That downloads the new disk image, verifies it and opens it, then Findling quits: drag **Findling** to **Applications** and replace the old version. **Check for Updates…** in the menu bar menu checks right away.
 
 ## Usage
 
@@ -58,14 +62,14 @@ Click a row to select it, double-click to open it, right-click for its actions.
 
 **Settings** has four tabs:
 
-- **General**: open at login, text size, theme color, the shortcut.
+- **General**: open at login, text size, theme color, the shortcut, updates.
 - **Locations**: the folders Findling indexes (home folder, Applications, iCloud Drive and cloud folders by default) and the folder buttons in the **Search in** row.
 - **Exclusions**: folders to leave out, the build output, dependencies and caches Findling skips on its own, and results you have hidden.
 - **Index**: item count, size on disk, folders Findling could not read, and **Refresh Now**.
 
 ## Privacy
 
-- Findling has no networking code and sends nothing anywhere.
+- Findling has no telemetry and sends nothing about you or your files anywhere. Its only network request asks GitHub for the latest version number, once a day; turn it off with **Settings › General › Check for updates automatically**. An update is downloaded only when you click **Download and Install**.
 - It searches names and paths, not file contents. The preview reads the selected file only while it is shown and stores nothing.
 - The index is an SQLite database in `~/Library/Application Support/Findling`. Settings, pins and learned choices are in `~/Library/Preferences/com.hamzabasaran.findling.plist`.
 

@@ -19,6 +19,7 @@ import os
     /// Set after `notice` when the notice offers to open Settings at this tab.
     @Published var noticeTab: SettingsTab?
     let shortcut: OpenShortcut
+    let updater: Updater
     @Published var warnings: [AccessWarning] = []
     @Published var roots: [String]
     @Published var folderFilters: [String] = []
@@ -77,6 +78,7 @@ import os
     init(previewing: Bool = false) {
         self.previewing = previewing
         shortcut = OpenShortcut(saves: !previewing)
+        updater = Updater(active: !previewing)
         if previewing {
             roots = ["/Applications", FileManager.default.homeDirectoryForCurrentUser.path]
             preferences = [:]
