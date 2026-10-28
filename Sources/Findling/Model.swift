@@ -110,11 +110,13 @@ import os
         let home = FileManager.default.homeDirectoryForCurrentUser
         let defaults = SearchScope.defaultRoots(home: home.path).filter { FileManager.default.fileExists(atPath: $0) }
         let saved = UserDefaults.standard.stringArray(forKey: "roots")
-        if UserDefaults.standard.integer(forKey: "scopeVersion") < 1 {
-            let migrated = Array(Set((saved ?? []) + defaults)).sorted()
+        let scopeVersion = UserDefaults.standard.integer(forKey: "scopeVersion")
+        if scopeVersion < 2 {
+            let added = scopeVersion < 1 ? defaults : defaults.filter { $0 == SearchScope.cryptexApplications }
+            let migrated = Array(Set((saved ?? []) + added)).sorted()
             roots = migrated
             UserDefaults.standard.set(migrated, forKey: "roots")
-            UserDefaults.standard.set(1, forKey: "scopeVersion")
+            UserDefaults.standard.set(2, forKey: "scopeVersion")
         } else {
             roots = saved ?? defaults
         }
@@ -212,7 +214,7 @@ import os
                 let localized = LocalizedNames.app(path)
                 if !localized.isEmpty { names[path] = localized }
             }
-            return (LocalizedNames.folders(in: ["/", home, "/Applications", "/System/Applications"]), names)
+            return (LocalizedNames.folders(in: ["/", home, "/Applications", "/System/Applications", SearchScope.cryptexApplications]), names)
         }.value
         checkedApps.formUnion(new)
         localizedNames = localizedNames.filter { $0.key.hasSuffix(".app") }.merging(found.folders) { $1 }.merging(iCloudAppFolders) { $1 }.merging(found.apps) { $1 }

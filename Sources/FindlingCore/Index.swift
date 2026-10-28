@@ -23,8 +23,11 @@ public enum SearchScope {
     public static func contains(_ path: String, in root: String) -> Bool {
         path == root || path.hasPrefix(root == "/" ? "/" : root + "/")
     }
+    /// Safari lives here since macOS 13; /Applications only holds a symlink, which the scan skips.
+    /// /System/Cryptexes/App links here too, and scanned paths come back resolved.
+    public static let cryptexApplications = "/System/Volumes/Preboot/Cryptexes/App/System/Applications"
     public static func defaultRoots(home: String) -> [String] {
-        [home, "/Applications", "/System/Applications",
+        [home, "/Applications", "/System/Applications", cryptexApplications,
          home + "/Library/Mobile Documents/com~apple~CloudDocs",
          home + "/Library/CloudStorage"]
     }

@@ -126,11 +126,18 @@ final class SearchTests: XCTestCase {
         }
         let roots = SearchScope.defaultRoots(home: root.path)
         XCTAssertTrue(roots.contains(root.path))
+        XCTAssertTrue(roots.contains(SearchScope.cryptexApplications))
         let scan = Scanner.scan(roots: [root.path, root.appendingPathComponent("Library/CloudStorage").path])
         XCTAssertTrue(scan.entries.contains { $0.name == "Gehaltsabrechnung.pdf" })
         XCTAssertTrue(scan.entries.contains { $0.name == "letter.pdf" })
         XCTAssertTrue(scan.entries.contains { $0.name == "cloud.pdf" })
         XCTAssertFalse(scan.entries.contains { $0.name == "noise.txt" })
+    }
+    func testSafariIsFoundInsideTheCryptex() throws {
+        let safari = SearchScope.cryptexApplications + "/Safari.app"
+        try XCTSkipUnless(FileManager.default.fileExists(atPath: safari))
+        let scan = Scanner.scan(roots: ["/Applications", SearchScope.cryptexApplications])
+        XCTAssertEqual(scan.entries.filter { $0.name == "Safari.app" }.map(\.path), [safari])
     }
     func testOverviewFindsDottedFolderBeforeDeepScanFinishes() throws {
         let fm = FileManager.default
