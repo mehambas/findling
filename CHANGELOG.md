@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2
+
+- Keychain Access, Archive Utility, Directory Utility, About This Mac and the other apps macOS keeps in its CoreServices folder are found. On macOS 26 Keychain Access opens Passwords.
+
 ## 0.2.1
 
 - Safari is found again. Since macOS 13 it lives outside the Applications folder, where only a link to it remains.
