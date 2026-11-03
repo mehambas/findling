@@ -26,8 +26,10 @@ public enum SearchScope {
     /// Safari lives here since macOS 13; /Applications only holds a symlink, which the scan skips.
     /// /System/Cryptexes/App links here too, and scanned paths come back resolved.
     public static let cryptexApplications = "/System/Volumes/Preboot/Cryptexes/App/System/Applications"
+    /// Keychain Access moved here in macOS 15, with no link left in /System/Applications/Utilities.
+    public static let coreServicesApplications = "/System/Library/CoreServices/Applications"
     public static func defaultRoots(home: String) -> [String] {
-        [home, "/Applications", "/System/Applications", cryptexApplications,
+        [home, "/Applications", "/System/Applications", cryptexApplications, coreServicesApplications,
          home + "/Library/Mobile Documents/com~apple~CloudDocs",
          home + "/Library/CloudStorage"]
     }
