@@ -119,7 +119,7 @@ public struct SkipRules: Sendable, Equatable {
                      olderReleases: true)
     ]
     /// Raised when the built-in rules change, so existing catalogs are walked again once.
-    public static let version = 1
+    public static let version = 2
     public let disabled: Set<String>
     private let names: Set<String>
     private let projectNames: Set<String>
@@ -224,8 +224,17 @@ public enum Scanner {
     /// Whether a scan starting at `root` never reaches `path` because an intermediate
     /// component is hidden or automatically skipped.
     static func skipsComponents(of path: String, below root: String, rules: SkipRules = .default) -> Bool {
-        let relative = path.dropFirst(root == "/" ? 1 : root.count + 1)
-        return relative.split(separator: "/").contains { rules.skipsByName(String($0)) || $0.hasPrefix(".") }
+        var current = root == "/" ? "" : root
+        var parent = String(root.split(separator: "/").last ?? "")
+        var project = isProject(path: root) ? parent : ""
+        for component in path.dropFirst(root == "/" ? 1 : root.count + 1).split(separator: "/") {
+            let name = String(component)
+            current += "/" + name
+            if name.hasPrefix(".") || rules.skips(folder: name, path: current, project: project, parent: parent) { return true }
+            if !name.lowercased().hasSuffix(".app"), isProject(path: current) { project = name }
+            parent = name
+        }
+        return false
     }
 
     public static func scan(roots: [String], maxDepth: Int? = nil, excludedPaths: [String] = [], rules: SkipRules = .default,

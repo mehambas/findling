@@ -325,5 +325,11 @@ final class SearchTests: XCTestCase {
         for name in ["o.txt", "wp", "load.php", "seo.php", "photo-300x200.jpg", "y.go", "PKG-INFO", "six.py", "old.php", "rc.php"] { XCTAssertTrue(everything.contains(name), name) }
         XCTAssertTrue(Scanner.skipsComponents(of: root.appendingPathComponent("project/node_modules/x").path, below: root.path))
         XCTAssertFalse(Scanner.skipsComponents(of: root.appendingPathComponent("project/node_modules/x").path, below: root.path, rules: SkipRules(disabled: ["dependencies"])))
+        let output = root.appendingPathComponent("project/out").path
+        XCTAssertTrue(Scanner.skipsComponents(of: output + "/o.txt", below: root.path))
+        XCTAssertFalse(Scanner.skipsComponents(of: root.appendingPathComponent("out/keep.txt").path, below: root.path))
+        XCTAssertEqual(SearchScope.effectiveRoots([root.path, output], exclusions: SearchScope.Paths([])), [root.path, output].sorted())
+        XCTAssertNil(SearchScope.coveringRoot(of: output, in: [root.path, output]))
+        XCTAssertTrue(Scanner.scan(roots: [root.path, output]).entries.contains { $0.name == "o.txt" })
     }
 }
