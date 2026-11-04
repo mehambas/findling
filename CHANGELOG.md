@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.3
+
+- A search location inside a skipped folder of a project, such as an `out` folder in a Git repository, is indexed. It was listed as “Already in Home folder” and none of its items were found. Existing indexes are walked once after the update.
+
 ## 0.2.2
 
 - Keychain Access, Archive Utility, Directory Utility, About This Mac and the other apps macOS keeps in its CoreServices folder are found. On macOS 26 Keychain Access opens Passwords.
